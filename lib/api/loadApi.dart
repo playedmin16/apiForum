@@ -1,95 +1,98 @@
-import '../objects/AppDetailsClass.dart';
-import '../objects/SteamAppsClass.dart';
 import 'dart:convert';
-import 'package:http/http.dart' as http;
 import 'package:flutter/foundation.dart';
+import 'package:http/http.dart' as http;
+
+import '../objects/MessageClass.dart';
+import '../objects/UserClass.dart';
 
 class LoadApi {
   static final LoadApi instance = LoadApi._internal();
   LoadApi._internal();
 
-  List<SteamApp> allApps = [];
-  Map<int, AppDetails> toutesLesApps = {};
-  bool appsLoaded = false;
+  List<User> tousLesUsers = [];
+  List<Message> tousLesMessages = [];
 
-  /// Liste de test de quelques AppIDs
-  final List<int> testAppIds = [
-    570, // Dota 2
-    440, // Team Fortress 2
-    730, // CS:GO
-    578080, // PUBG
-    105600, // Terraria
-  ];
+  bool usersLoaded = false;
+  bool messagesLoaded = false;
 
-  /// Charge les jeux pour les AppIDs de test
-  Future<void> loadTestApps() async {
-    allApps.clear();
+  String apiBaseUrl = "http://s5-5738.nuage-peda.fr/forum/api";
 
-    for (var appId in testAppIds) {
-      try {
-        AppDetails? details = await getAppDetails(appId);
-        if (details != null) {
-          allApps.add(SteamApp(details.getAppid(), details.getName()));
-        }
-      } catch (e) {
-        debugPrint('Erreur lors du chargement de l\'appid $appId : $e');
-      }
-    }
-
-    appsLoaded = true;
-    debugPrint('Apps chargées : ${allApps.length} jeux trouvés.');
-  }
-
-  /// Récupère les détails d'une app (cache)
-  Future<AppDetails?> getAppDetails(int appId) async {
-    if (toutesLesApps.containsKey(appId)) {
-      return toutesLesApps[appId];
-    }
-
-    String url = "https://store.steampowered.com/api/appdetails?appids=$appId";
+  Future<void> loadUsers() async {
+    final url = "$apiBaseUrl/users";
 
     try {
-      var response = await http.get(Uri.parse(url));
+      final response = await http.get(Uri.parse(url));
+
       if (response.statusCode == 200) {
-        Map<String, dynamic> dataMap = jsonDecode(response.body);
-        var appData = dataMap[appId.toString()]['data'];
+        final data = jsonDecode(response.body);
+        tousLesUsers.clear();
 
-        if (appData == null) return null;
+        if (data["member"] != null) {
+          for (var u in data["member"]) {
+            User user = User(
+              u["id"] ?? 0,
+              u["email"] ?? "",
+              [], // roles : non fournis
+              u["nom"] ?? "",
+              u["prenom"] ?? "",
+            );
 
-        AppDetails details = AppDetails(
-          appData['type'] ?? '',
-          appData['name'] ?? '',
-          appData['steam_appid'] ?? 0,
-          appData['required_age'] ?? 0,
-          appData['short_description'] ?? '',
-          appData['header_image'] ?? '',
-          appData['website'] ?? '',
-          List<String>.from(appData['developers'] ?? []),
-          List<String>.from(appData['publishers'] ?? []),
-          appData['price_overview'] != null
-              ? appData['price_overview']['currency'] ?? ''
-              : '',
-          appData['price_overview'] != null
-              ? (appData['price_overview']['final'] ?? 0) / 100.0
-              : 0.0,
-          List<String>.from(
-            appData['genres']?.map((g) => g['description']) ?? [],
-          ),
-          appData['release_date'] != null
-              ? appData['release_date']['date'] ?? ''
-              : '',
-        );
+            tousLesUsers.add(user);
+          }
+        }
 
-        toutesLesApps[appId] = details;
-        return details;
-      } else {
-        throw Exception('Erreur HTTP détails : ${response.statusCode}');
+        usersLoaded = true;
+        debugPrint("Users chargés : ${tousLesUsers.length}");
       }
     } catch (e) {
-      debugPrint(
-        "Erreur lors de la récupération des détails pour l'appid $appId : $e",
-      );
-      return null;
+      debugPrint("Erreur loadUsers : $e");
+    }
+  }
+
+  Future<void> loadMessages() async {
+    final url = "$apiBaseUrl/messages";
+
+    try {
+      final response = await http.get(Uri.parse(url));
+
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        tousLesMessages.clear();
+
+        if (data["member"] != null) {
+          for (var m in data["member"]) {
+            int idUser = 0;
+            if (m["user"] != null && m["user"]["@id"] != null) {
+              final uri = m["user"]["@id"];
+              idUser = int.tryParse(uri.split("/").last) ?? 0;
+            }
+
+            int? parentId;
+            if (m["parent"] != null && m["parent"]["@id"] != null) {
+              final uri = m["parent"]["@id"];
+              parentId = int.tryParse(uri.split("/").last);
+            } else {
+              parentId = null;
+            }
+
+            Message message = Message(
+              m["id"] ?? 0,
+              idUser,
+              parentId,
+              DateTime.parse(m["datePoste"]),
+              m["titre"] ?? "",
+              m["contenu"] ?? "",
+            );
+
+            tousLesMessages.add(message);
+          }
+        }
+
+        messagesLoaded = true;
+        debugPrint("Messages chargés : ${tousLesMessages.length}");
+      }
+    } catch (e) {
+      debugPrint("Erreur loadMessages : $e");
     }
   }
 }
