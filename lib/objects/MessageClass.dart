@@ -1,75 +1,51 @@
 class Message {
-  // attributs
+  final int id;
+  final String title;
+  final String content;
+  final DateTime postedAt;
+  final String userLastName;
+  final String userFirstName;
+  final int? parentId;
 
-  int _idMessage;
-  int _idUser;
-  int? _idMessageParent;
-  String _titre;
-  DateTime _datePost;
-  String _contenu;
+  Message({
+    required this.id,
+    required this.title,
+    required this.content,
+    required this.postedAt,
+    required this.userLastName,
+    required this.userFirstName,
+    this.parentId,
+  });
 
-  // constructeur
+  // Méthode usine (factory) permettant de créer un Message
+  // à partir d’une structure JSON reçue depuis l’API
+  factory Message.fromJson(Map<String, dynamic> json) {
+    // Récupère l’objet "user" dans le JSON, ou un objet vide si absent
+    final user = json['user'] ?? {};
+    return Message(
+      id: json['id'] ?? 0,
+      title: json['titre'] ?? '',
+      content: json['contenu'] ?? '',
+      postedAt: DateTime.parse(json['datePoste']),
+      userLastName: user['nom'] ?? '',
+      userFirstName: user['prenom'] ?? '',
 
-  Message(
-    this._idMessage,
-    this._idUser,
-    this._idMessageParent,
-    this._datePost,
-    this._titre,
-    this._contenu,
-  );
+      parentId: json['parent'] != null
+          ? int.parse(json['parent']['@id'].split('/').last)
+          : null,
 
-  // getters
+      /*
+      
+      équivalent :
 
-  int getIdMessage() {
-    return this._idMessage;
+      if (parentId.json['parent] != null) {
+        int.parse(json['parent']['@id'].split('/').last); -> Split sépares par le caractère spécifié et .last prend le dernier.
+                                                             On récup donc l'id
+      } else {
+        null;
+      }
+      
+      */
+    );
   }
-
-  int getIdUser() {
-    return this._idUser;
-  }
-
-  int? getIdMessageParent() {
-    return this._idMessageParent;
-  }
-
-  DateTime getDatePost() {
-    return this._datePost;
-  }
-
-  String getTitre() {
-    return this._titre;
-  }
-
-  String getContenu() {
-    return this._contenu;
-  }
-
-  // setters
-
-  void setIdMessage(int idMessage) {
-    this._idMessage = idMessage;
-  }
-
-  void setIdUser(int idUser) {
-    this._idUser = idUser;
-  }
-
-  void setIdMessageParent(int idMessageParent) {
-    this._idMessageParent = idMessageParent;
-  }
-
-  void setDatePost(DateTime date) {
-    this._datePost = date;
-  }
-
-  void setTitre(String titre) {
-    this._titre = titre;
-  }
-
-  void setContenu(String contenu) {
-    this._contenu = contenu;
-  }
-
-  // fonctions
 }
