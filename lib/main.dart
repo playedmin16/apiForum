@@ -3,7 +3,9 @@ import 'MyHomePage.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 Future<void> main() async {
-  await dotenv.load(fileName: "assets/.env.local");
+  await dotenv.load(
+    fileName: "assets/.env.local",
+  ); // load des variables d'enironement custom avant de lancer mon app
   runApp(const MyApp());
 }
 

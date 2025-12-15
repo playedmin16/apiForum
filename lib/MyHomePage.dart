@@ -1,3 +1,5 @@
+import 'package:api_forum/InscriptionPage.dart';
+import 'package:api_forum/ListeUsersPage.dart';
 import 'package:flutter/material.dart';
 import 'api/messageApi.dart';
 import 'objects/MessageClass.dart';
@@ -18,11 +20,34 @@ class _MyHomePageState extends State<MyHomePage> {
     futureMessages = MessageApi().fetchMessages();
   }
 
+  void goPageListeUsers() {
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => ListeUsersPage()),
+    );
+  }
+
+  void goPageInscription() {
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => InscriptionPage()),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       // Barre supérieure de la page
-      appBar: AppBar(title: const Text('Messages')),
+      appBar: AppBar(
+        title: const Text('Messages'),
+        actions: [
+          TextButton(
+            onPressed: goPageListeUsers,
+            child: Text("Liste des users"),
+          ),
+          TextButton(onPressed: goPageInscription, child: Text("Inscription")),
+        ],
+      ),
       // FutureBuilder permet d’afficher du contenu une fois la Future terminée
       body: FutureBuilder<List<Message>>(
         future: futureMessages,
@@ -60,7 +85,8 @@ class _MyHomePageState extends State<MyHomePage> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       // Affichage de la date formatée manuellement
-                      // padLeft permet de compléter une chaîne de caractères à gauche avec un caractère choisi. (ici un 0 pour rester sur 2 caractères)
+                      // padLeft permet de compléter une chaîne de caractères
+                      //à gauche avec un caractère choisi. (ici un 0 pour rester sur 2 caractères)
                       Text(
                         "${m.postedAt.day.toString().padLeft(2, '0')}/"
                         "${m.postedAt.month.toString().padLeft(2, '0')}/"
