@@ -111,3 +111,37 @@ exemple, problème de réseau ou de configuration). Si une exception est captur�
 d'erreur est affiché et la fonction retourne 0.
 
 */
+
+Future<http.Response> login(String email, String password) async {
+  final String baseUrl = dotenv.env['API_BASE_URL']!;
+  final url = "$baseUrl/users";
+  final urlFull = Uri.parse(url);
+  final headers = {
+    'accept': 'application/json',
+    'Content-Type': 'application/json',
+  };
+  final body = jsonEncode({'email': email, 'password': password});
+  final response = await http.post(urlFull, headers: headers, body: body);
+  /*
+  La requête POST est envoyée à l'URL spécifiée avec les en-têtes et le corps définis.
+  La méthode await est utilisée pour attendre la réponse de l'API.
+  */
+  if (response.statusCode == 200) {
+    return response;
+  } else {
+    throw Exception('Failed to login: ${response.reasonPhrase}');
+  }
+}
+
+/*
+
+Future<http.Response> login(String email, String password) async {
+
+La méthode est déclarée avec un retour de type Future<http.Response>, ce qui signifie qu'elle
+renverra un objet http.Response à un moment futur après l'exécution asynchrone de la méthode.
+Elle prend deux paramètres : email et password, qui sont les informations d'identification de
+l'utilisateur.
+
+'accept': 'application/json' // indique que la réponse attendue doit être en format JSON.
+'Content-Type': 'application/json' //indique que le corps de la requête sera au format JSON.
+*/
