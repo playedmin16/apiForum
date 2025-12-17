@@ -1,6 +1,7 @@
+import 'package:api_forum/api/userApi.dart';
 import 'package:api_forum/utils/secure_storage.dart';
 import 'package:flutter/material.dart';
-import 'package:api_forum/api/userApi.dart';
+import 'dart:convert';
 import 'package:provider/provider.dart';
 import '../providers/auth_provider.dart';
 
@@ -13,7 +14,6 @@ class _LoginFormState extends State<LoginForm> {
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
-  final UserApi userApi = UserApi();
   final SecureStorage secureStorage = SecureStorage();
 
   bool _isLoading = false;
@@ -27,7 +27,6 @@ class _LoginFormState extends State<LoginForm> {
     final credentials = await secureStorage.readCredentials();
     setState(() {
       _emailController.text = credentials['email'] ?? '';
-      _passwordController.text = credentials['password'] ?? '';
     });
   }
 
@@ -36,24 +35,27 @@ class _LoginFormState extends State<LoginForm> {
       _isLoading = true;
     });
     try {
-      final response = await login(
+      final response = await UserApi().login(
         _emailController.text,
         _passwordController.text,
       );
-      await secureStorage.saveCredentials(
-        _emailController.text,
-        _passwordController.text,
-      );
-      Provider.of<AuthProvider>(context, listen: false).login();
+      final token = json.decode(response.body)['token'];
+      await secureStorage.saveToken(token);
+      await secureStorage.saveEmail(_emailController.text);
+
+      if (!mounted) return;
+
+      Provider.of<AuthProvider>(context, listen: false).login(token);
+
       ScaffoldMessenger.of(
         context,
       ).showSnackBar(SnackBar(content: Text('Authentification réussie')));
-      Future.delayed(Duration(seconds: 2), () {
-        Navigator.pushReplacementNamed(context, '/');
-      });
+
+      Navigator.pushReplacementNamed(context, '/');
     } catch (e) {
+      if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Echec de l\'authentification $e')),
+        SnackBar(content: Text('Échec de l\'authentification: $e')),
       );
     } finally {
       setState(() {
@@ -69,7 +71,7 @@ class _LoginFormState extends State<LoginForm> {
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Form(
-          key: _formKey,
+          key: _formKey, // Clé du formulaire
           child: Column(
             children: [
               TextFormField(
@@ -104,6 +106,13 @@ class _LoginFormState extends State<LoginForm> {
                       },
                       child: Text('Se connecter'),
                     ),
+              SizedBox(height: 20),
+              TextButton(
+                onPressed: () {
+                  Navigator.pushNamed(context, '/inscription');
+                },
+                child: Text("Pas de compte ? S'inscrire"),
+              ),
             ],
           ),
         ),

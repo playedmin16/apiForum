@@ -1,6 +1,6 @@
-import 'package:api_forum/InscriptionPage.dart';
-import 'package:api_forum/ListeUsersPage.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'providers/auth_provider.dart';
 import 'api/messageApi.dart';
 import 'objects/MessageClass.dart';
 
@@ -20,20 +20,6 @@ class _MyHomePageState extends State<MyHomePage> {
     futureMessages = MessageApi().fetchMessages();
   }
 
-  void goPageListeUsers() {
-    Navigator.push(
-      context,
-      MaterialPageRoute(builder: (context) => ListeUsersPage()),
-    );
-  }
-
-  void goPageInscription() {
-    Navigator.push(
-      context,
-      MaterialPageRoute(builder: (context) => InscriptionPage()),
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -42,10 +28,21 @@ class _MyHomePageState extends State<MyHomePage> {
         title: const Text('Messages'),
         actions: [
           TextButton(
-            onPressed: goPageListeUsers,
+            onPressed: () => Navigator.pushNamed(context, '/users'),
             child: Text("Liste des users"),
           ),
-          TextButton(onPressed: goPageInscription, child: Text("Inscription")),
+          TextButton(
+            onPressed: () => Navigator.pushNamed(context, '/inscription'),
+            child: Text("Inscription"),
+          ),
+          IconButton(
+            icon: const Icon(Icons.logout),
+            tooltip: 'Déconnexion',
+            onPressed: () {
+              Provider.of<AuthProvider>(context, listen: false).logout();
+              Navigator.pushReplacementNamed(context, '/login');
+            },
+          ),
         ],
       ),
       // FutureBuilder permet d’afficher du contenu une fois la Future terminée
