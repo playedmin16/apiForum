@@ -28,54 +28,6 @@ class _InscriptionPageState extends State<InscriptionPage> {
         _passwordController.text,
       );
 
-      /* Code de la modale pour l'affichage des détails d'un message.
-         Ce code est un modèle à copier/coller dans MyHomePage.dart.
-         Il suppose qu'une variable 'message' de type Message est disponible.
-
-      showDialog(
-        context: context,
-        builder: (context) => Dialog(
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(12.0),
-          ),
-          child: Padding(
-            padding: const EdgeInsets.all(20.0),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: <Widget>[
-                Text(message.title,
-                    style: const TextStyle(
-                        fontSize: 20, fontWeight: FontWeight.bold)),
-                const SizedBox(height: 12),
-                Text(
-                  "Par ${message.userFirstName} ${message.userLastName} le "
-                  "${message.postedAt.day.toString().padLeft(2, '0')}/"
-                  "${message.postedAt.month.toString().padLeft(2, '0')}/"
-                  "${message.postedAt.year}",
-                  style: TextStyle(fontSize: 12, color: Colors.grey[600]),
-                ),
-                const Divider(height: 24),
-                Flexible(
-                  child: SingleChildScrollView(
-                    child: Text(message.content),
-                  ),
-                ),
-                const SizedBox(height: 24),
-                Align(
-                  alignment: Alignment.centerRight,
-                  child: TextButton(
-                    child: const Text('Fermer'),
-                    onPressed: () => Navigator.of(context).pop(),
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ),
-      );
-      */
-
       setState(() {
         _isLoading = false;
       });
