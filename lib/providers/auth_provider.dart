@@ -7,6 +7,7 @@ class AuthProvider extends ChangeNotifier {
 
   String? get token => _token;
   bool get isAuthenticated => _token != null;
+  bool get isLoggedIn => isAuthenticated;
 
   AuthProvider() {
     _secureStorage.readToken().then((token) {
