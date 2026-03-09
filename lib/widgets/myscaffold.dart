@@ -16,10 +16,22 @@ class MyScaffold extends StatelessWidget {
         elevation: 10.0,
         centerTitle: true,
         actions: <Widget>[
+          if (authProvider.isLoggedIn &&
+              authProvider.nom != null &&
+              authProvider.prenom != null)
+            Padding(
+              padding: const EdgeInsets.only(right: 16.0),
+              child: Center(
+                child: Text(
+                  'Connecté en tant que ${authProvider.prenom} ${authProvider.nom}',
+                  style: TextStyle(color: Colors.white, fontSize: 14),
+                ),
+              ),
+            ),
           IconButton(
             icon: Icon(Icons.app_registration, color: Colors.white),
             onPressed: () {
-              Navigator.pushNamed(context, '/register');
+              Navigator.pushNamed(context, '/inscription');
             },
           ),
           IconButton(

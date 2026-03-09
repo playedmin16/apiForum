@@ -80,4 +80,21 @@ class UserApi {
       throw Exception('Failed to login: ${response.reasonPhrase}');
     }
   }
+
+  Future<Map<String, dynamic>> getUser() async {
+    final token = await _secureStorage.readToken();
+    if (token == null) throw Exception('No token');
+
+    final url = "$baseUrl/me"; // Suppose endpoint /me pour l'user actuel
+    final response = await http.get(
+      Uri.parse(url),
+      headers: {'Authorization': 'Bearer $token'},
+    );
+
+    if (response.statusCode == 200) {
+      return json.decode(response.body);
+    } else {
+      throw Exception('Failed to get user: ${response.reasonPhrase}');
+    }
+  }
 }

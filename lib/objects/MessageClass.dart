@@ -31,7 +31,13 @@ class Message {
       userFirstName: user['prenom'] ?? '',
 
       parentId: json['parent'] != null
-          ? int.parse(json['parent']['@id'].split('/').last)
+          ? json['parent'] is String
+                ? int.parse(json['parent'].split('/').last)
+                : int.parse(
+                    (json['parent'] as Map<String, dynamic>)['@id']
+                        .split('/')
+                        .last,
+                  )
           : null,
 
       /*
